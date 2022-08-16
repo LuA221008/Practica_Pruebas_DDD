@@ -24,6 +24,8 @@ public class ProductoAgregado extends DomainEvent {
         this.precio = precio;
     }
 
+
+
     public ProductoId getProductoId() {
         return productoId;
     }

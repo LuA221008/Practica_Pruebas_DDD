@@ -23,4 +23,16 @@ public class ProductoActualizado extends DomainEvent {
         this.color = color;
         talla = null;
     }
+
+    public ProductoId getEntityId() {
+        return entityId;
+    }
+
+    public Talla getTalla() {
+        return talla;
+    }
+
+    public Color getColor() {
+        return color;
+    }
 }

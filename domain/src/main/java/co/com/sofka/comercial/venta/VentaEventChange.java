@@ -5,11 +5,14 @@ import co.com.sofka.domain.generic.EventChange;
 import co.com.sofka.generic.values.Fecha;
 import co.com.sofka.generic.values.Nombre;
 
+import java.util.ArrayList;
+
 public class VentaEventChange extends EventChange {
     public VentaEventChange(Venta venta) {
         apply((VentaCreada event) -> {
             venta.fecha = event.getFecha();
             venta.total = event.getTotal();
+            venta.productos = new ArrayList<>();
         });
 
         apply((ClienteAsignado event) -> {

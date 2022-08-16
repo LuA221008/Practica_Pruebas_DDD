@@ -1,17 +1,14 @@
 package co.com.sofka.comercial.venta;
 
-
 import co.com.sofka.business.generic.UseCaseHandler;
 import co.com.sofka.business.repository.DomainEventRepository;
-
 import co.com.sofka.business.support.RequestCommand;
 import co.com.sofka.comercial.tienda.values.TiendaId;
-import co.com.sofka.comercial.venta.commands.AsignarCliente;
-import co.com.sofka.comercial.venta.events.ClienteAsignado;
+import co.com.sofka.comercial.venta.commands.ActualizarDatosProducto;
+import co.com.sofka.comercial.venta.events.ProductoActualizado;
+import co.com.sofka.comercial.venta.events.ProductoAgregado;
 import co.com.sofka.comercial.venta.events.VentaCreada;
-import co.com.sofka.comercial.venta.values.Telefono;
-import co.com.sofka.comercial.venta.values.Total;
-import co.com.sofka.comercial.venta.values.VentaId;
+import co.com.sofka.comercial.venta.values.*;
 import co.com.sofka.domain.generic.DomainEvent;
 import co.com.sofka.generic.values.Fecha;
 import co.com.sofka.generic.values.Nombre;
@@ -27,38 +24,41 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
-class AsignarClienteUseCaseTest {
+class ActualizarDatosDeProductoUseCaseTest {
     @InjectMocks
-    AsignarClienteUseCase useCase;
+    ActualizarDatosDeProductoUseCase useCase;
 
     @Mock
     private DomainEventRepository repository;
 
     @Test
-    public void asignarClienteHappyPass() {
-        var ventaId = VentaId.of("zzzz");
-        var nombre = new Nombre("Lidia", "Bustamante");
-        var telefono = new Telefono("3203331111");
-        var command = new AsignarCliente(ventaId, nombre, telefono);
+    public void ActualizarDatosDeProducto() {
+        //arrange
+        var ventaId = VentaId.of("venta1");
+        var productoId = ProductoId.of("prodcuto1");
+        var color = new Color("Azul");
+        var command = new ActualizarDatosProducto(ventaId,productoId,color);
 
-        when(repository.getEventsBy("zzzz")).thenReturn(history());
+        when(repository.getEventsBy("venta1")).thenReturn(history());
         useCase.addRepository(repository);
-//act
+
         var events = UseCaseHandler.getInstance()
                 .setIdentifyExecutor(command.getVentaId().value())
                 .syncExecutor(useCase, new RequestCommand<>(command))
                 .orElseThrow()
                 .getDomainEvents();
-//assert
-        var event = (ClienteAsignado) events.get(0);
-        Assertions.assertEquals("Lidia", event.getNombre().value().nombre());
-        Assertions.assertEquals("Bustamante", event.getNombre().value().apellido());
-        Assertions.assertEquals("3203331111", event.getTelefono().value());
+
+        var event = ( ProductoActualizado) events.get(0);
+        Assertions.assertEquals("Azul", event.getColor().value());
+
+
+
+
     }
 
-    private List<DomainEvent> history() {
+
+    private List<DomainEvent> history(){
         var tiendaId = TiendaId.of("zzzz");
         var fecha = new Fecha(LocalDateTime.of(2022, 05, 20, 9, 50));
         var total = new Total(200000D);
@@ -66,9 +66,14 @@ class AsignarClienteUseCaseTest {
                 tiendaId,
                 fecha,
                 total);
-        event.setAggregateRootId("zzzz");
-        return List.of(event);
+
+        var event2 = new ProductoAgregado(ProductoId.of("producto1")
+                , new Nombre("Camisa", "StudioF")
+                , new Talla(Talla.Tallas.L), new Color("negro")
+                , new Precio("pesos", 2000.0));
+
+        event.setAggregateRootId("venta1");
+
+        return List.of(event, event2);
     }
-
 }
-
